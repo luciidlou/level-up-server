@@ -19,5 +19,33 @@
         "fields": {
             "label": "MMO game"
         }
+    },
+    {
+        "model": "levelupapi.gametype",
+        "pk": 4,
+        "fields": {
+            "label": "Racing Game"
+        }
+    },
+    {
+        "model": "levelupapi.gametype",
+        "pk": 5,
+        "fields": {
+            "label": "FPS game"
+        }
+    },
+    {
+        "model": "levelupapi.gametype",
+        "pk": 6,
+        "fields": {
+            "label": "Strategy game"
+        }
+    },
+    {
+        "model": "levelupapi.gametype",
+        "pk": 7,
+        "fields": {
+            "label": "Card game"
+        }
     }
 ]

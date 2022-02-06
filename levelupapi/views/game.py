@@ -53,7 +53,7 @@ class GameView(ViewSet):
         # client sent valid data. If the code passes validation,
         # then the save method will add the game to the
         # database and add an id to the serializer.
-        
+
         gamer = Gamer.objects.get(user=request.auth.user)
         try:
             serializer = CreateGameSerializer(data=request.data)
@@ -63,9 +63,42 @@ class GameView(ViewSet):
         except ValidationError as ex:
             return Response({'message': ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
+    def update(self, request, pk):
+        """Handle PUT requests for a game
+
+        Returns:
+            Response -- Empty body with 204 status code
+        """
+
+        game = Game.objects.get(pk=pk)
+        game.title = request.data["title"]
+        game.maker = request.data["maker"]
+        game.number_of_players = request.data["number_of_players"]
+        game.skill_level = request.data["skill_level"]
+
+        game_type = GameType.objects.get(pk=request.data["game_type"])
+        game.game_type = game_type
+        game.save()
+
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+    def destroy(self, request, pk):
+        """Handles DELETE requests for a game
+
+        Args:
+            request (object): the object we want to delete
+            pk (integer): the primary key on the object
+
+        Returns:
+            response: 204 no content
+        """
+        game = Game.objects.get(pk=pk)
+        game.delete()
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+
 
 class GameSerializer(serializers.ModelSerializer):
-    """JSON serializer for games"""
+    """JSON serializer for retrieveing games"""
     class Meta:
         model = Game
         fields = "__all__"
@@ -73,6 +106,7 @@ class GameSerializer(serializers.ModelSerializer):
 
 
 class CreateGameSerializer(serializers.ModelSerializer):
+    """JSON serializer for creating games"""
     class Meta:
         model = Game
         # ? Does it matter if 'fields' is a tuple or an array?
