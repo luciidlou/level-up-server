@@ -1,6 +1,8 @@
 """View module for handling requests about game types"""
+from email.policy import default
 from django.forms import ValidationError
 from django.http import HttpResponseServerError
+from django.db.models import Count
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers, status
@@ -29,7 +31,8 @@ class GameView(ViewSet):
         Returns:
             Response: JSON serialized event
         """
-        games = Game.objects.all()
+        # games = Game.objects.all()
+        games = Game.objects.annotate(event_count=Count('events'))
 
         game_type = request.query_params.get('type', None)
 
@@ -45,15 +48,6 @@ class GameView(ViewSet):
         Returns:
             Response -- JSON serialized game instance
         """
-        # Instead of making a new instance of the Game model, the
-        # request.data dictionary is passed to the new serializer as
-        # the data. The keys on the dictionary must match what
-        # is in the fields on the serializer. After creating the
-        # serializer instance, call is_valid to make sure the
-        # client sent valid data. If the code passes validation,
-        # then the save method will add the game to the
-        # database and add an id to the serializer.
-
         gamer = Gamer.objects.get(user=request.auth.user)
         try:
             serializer = CreateGameSerializer(data=request.data)
@@ -99,6 +93,7 @@ class GameView(ViewSet):
 
 class GameSerializer(serializers.ModelSerializer):
     """JSON serializer for retrieveing games"""
+    event_count = serializers.IntegerField(default=None)
     class Meta:
         model = Game
         fields = "__all__"
@@ -109,6 +104,5 @@ class CreateGameSerializer(serializers.ModelSerializer):
     """JSON serializer for creating games"""
     class Meta:
         model = Game
-        # ? Does it matter if 'fields' is a tuple or an array?
         fields = ['id', 'title', 'maker',
                   'number_of_players', 'skill_level', 'game_type']
